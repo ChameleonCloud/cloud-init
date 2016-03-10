@@ -1,0 +1,13 @@
+diff -uNr cloud-init-0.7.5__orig/cloudinit/sources/DataSourceOpenNebula.py cloud-init-0.7.5/cloudinit/sources/DataSourceOpenNebula.py
+--- cloud-init-0.7.5__orig/cloudinit/sources/DataSourceOpenNebula.py	2014-08-29 11:01:19.817660822 +0100
++++ cloud-init-0.7.5/cloudinit/sources/DataSourceOpenNebula.py	2014-08-29 11:02:19.641660786 +0100
+@@ -288,8 +288,7 @@
+ 
+ 
+ def switch_user_cmd(user):
+-    return ['sudo', '-u', user]
+-
++    return ['runuser', '-u', user, '--']
+ 
+ def parse_shell_config(content, keylist=None, bash=None, asuser=None,
+                        switch_user_cb=None):

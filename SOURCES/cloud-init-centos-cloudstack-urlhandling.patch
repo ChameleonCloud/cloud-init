@@ -1,0 +1,18 @@
+diff -uNr cloud-init-0.7.5__orig/cloudinit/url_helper.py cloud-init-0.7.5/cloudinit/url_helper.py
+--- cloud-init-0.7.5__orig/cloudinit/url_helper.py	2014-04-01 19:26:07.000000000 +0100
++++ cloud-init-0.7.5/cloudinit/url_helper.py	2014-08-29 11:21:04.347660108 +0100
+@@ -237,6 +237,14 @@
+             return UrlResponse(r)
+         except exceptions.RequestException as e:
++            # CloudStack workaround to handle trailing slash (#7544)
++            if e.response.status_code == 404:
++                if url.endswith("/"):
++                    url = url[:-1]
++                    req_args["url"] = url
++                else:
++                    url = url + "/"
++                    req_args["url"] = url
+             if (isinstance(e, (exceptions.HTTPError))
+                 and hasattr(e, 'response')  # This appeared in v 0.10.8
+                 and hasattr(e.response, 'status_code')):
+                 excps.append(UrlError(e, code=e.response.status_code,

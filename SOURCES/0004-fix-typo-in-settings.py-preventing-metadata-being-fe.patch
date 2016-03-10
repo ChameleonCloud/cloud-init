@@ -1,0 +1,23 @@
+From 8715fe5757815bf2cb9441985d608a4f0b4e947d Mon Sep 17 00:00:00 2001
+From: Lars Kellogg-Stedman <lars@redhat.com>
+Date: Mon, 23 Jun 2014 13:15:54 -0400
+Subject: [PATCH] fix typo in settings.py preventing metadata being fecthed in
+ ec2
+
+---
+ cloudinit/settings.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cloudinit/settings.py b/cloudinit/settings.py
+index 37d4958..5efcb0b 100644
+--- a/cloudinit/settings.py
++++ b/cloudinit/settings.py
+@@ -37,7 +37,7 @@ CFG_BUILTIN = {
+         'OVF',
+         'MAAS',
+         'GCE',
+-        'OpenStack'
++        'OpenStack',
+         'Ec2',
+         'CloudSigma',
+         'CloudStack',

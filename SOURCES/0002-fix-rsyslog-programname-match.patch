@@ -1,0 +1,20 @@
+From 502e27516f6d16939e9a35339fb99f418e406169 Mon Sep 17 00:00:00 2001
+From: Lars Kellogg-Stedman <lars@redhat.com>
+Date: Mon, 23 Jun 2014 13:13:57 -0400
+Subject: [PATCH] fix rsyslog programname match
+
+---
+ tools/21-cloudinit.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/21-cloudinit.conf b/tools/21-cloudinit.conf
+index c65325c..248e3b1 100644
+--- a/tools/21-cloudinit.conf
++++ b/tools/21-cloudinit.conf
+@@ -1,5 +1,5 @@
+ # Log cloudinit generated log messages to file
+-:syslogtag, isequal, "[CLOUDINIT]" /var/log/cloud-init.log
++:programname, isequal, "cloud-init" /var/log/cloud-init.log
+ 
+ # comment out the following line to allow CLOUDINIT messages through.
+ # Doing so means you'll also get CLOUDINIT messages in /var/log/syslog

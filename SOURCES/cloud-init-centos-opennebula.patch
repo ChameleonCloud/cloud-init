@@ -1,0 +1,112 @@
+diff -uNr cloud-init-0.7.5__orig/cloudinit/sources/DataSourceOpenNebula.py cloud-init-0.7.5/cloudinit/sources/DataSourceOpenNebula.py
+--- cloud-init-0.7.5__orig/cloudinit/sources/DataSourceOpenNebula.py	2014-04-01 19:26:07.000000000 +0100
++++ cloud-init-0.7.5/cloudinit/sources/DataSourceOpenNebula.py	2014-07-29 20:20:20.286992747 +0100
+@@ -29,6 +29,7 @@
+ import pwd
+ import re
+ import string  # pylint: disable=W0402
++#import sys
+ 
+ from cloudinit import log as logging
+ from cloudinit import sources
+@@ -149,7 +150,7 @@
+ 
+ class OpenNebulaNetwork(object):
+     REG_DEV_MAC = re.compile(
+-                    r'^\d+: (eth\d+):.*?link\/ether (..:..:..:..:..:..) ?',
++                    r'^\d+: (\w+):.*?link\/\w+ (..:..:..:..:..:..) ?',
+                     re.MULTILINE | re.DOTALL)
+ 
+     def __init__(self, ip, context):
+@@ -158,7 +159,11 @@
+         self.ifaces = self.get_ifaces()
+ 
+     def get_ifaces(self):
+-        return self.REG_DEV_MAC.findall(self.ip)
++        list = self.REG_DEV_MAC.findall(self.ip)
++        ifaces = dict()
++        for l in list:
++            ifaces[l[1]] = l[0]
++        return ifaces
+ 
+     def mac2ip(self, mac):
+         components = mac.split(':')[2:]
+@@ -206,6 +211,15 @@
+         else:
+             return None
+ 
++    def get_context_interfaces(self):
++
++        def device_mac(t): return re.match(r"ETH\d+_MAC", t)
++
++        mac_vars = filter(device_mac, self.context.keys())
++
++        context_interfaces = [v.split('_')[0] for v in mac_vars]
++        return context_interfaces
++
+     def gen_conf(self):
+         global_dns = []
+         if 'DNS' in self.context:
+@@ -216,27 +230,37 @@
+         conf.append('iface lo inet loopback')
+         conf.append('')
+ 
+-        for i in self.ifaces:
+-            dev = i[0]
+-            mac = i[1]
++        context_interfaces = self.get_context_interfaces()
++
++        if len(context_interfaces):
++            try:
++                (out, _err) = util.subp(["systemctl", "stop", "NetworkManager"])
++                (out, _err) = util.subp(["systemctl", "disable", "NetworkManager"])
++            except util.ProcessExecutionError:
++                util.logexc(LOG, "Disable NetworkManager command failed")
++
++        for interface in context_interfaces:
++            mac = self.context[interface+"_MAC"]
++            dev = self.ifaces[mac]
++
+             ip_components = self.mac2ip(mac)
+ 
+             conf.append('auto ' + dev)
+             conf.append('iface ' + dev + ' inet static')
+-            conf.append('  address ' + self.get_ip(dev, ip_components))
+-            conf.append('  network ' + self.get_network(dev, ip_components))
+-            conf.append('  netmask ' + self.get_mask(dev))
++            conf.append('  address ' + self.get_ip(interface, ip_components))
++            conf.append('  network ' + self.get_network(interface, ip_components))
++            conf.append('  netmask ' + self.get_mask(interface))
+ 
+-            gateway = self.get_gateway(dev)
++            gateway = self.get_gateway(interface)
+             if gateway:
+                 conf.append('  gateway ' + gateway)
+ 
+-            domain = self.get_domain(dev)
++            domain = self.get_domain(interface)
+             if domain:
+                 conf.append('  dns-search ' + domain)
+ 
+             # add global DNS servers to all interfaces
+-            dns = self.get_dns(dev)
++            dns = self.get_dns(interface)
+             if global_dns or dns:
+                 all_dns = global_dns
+                 if dns:
+@@ -404,8 +428,8 @@
+ 
+     if ssh_key_var:
+         lines = context.get(ssh_key_var).splitlines()
+-        results['metadata']['public-keys'] = [l for l in lines
+-            if len(l) and not l.startswith("#")]
++        ssh_keys = [l for l in lines if len(l) and not l.startswith("#")]
++        results['metadata']['public-keys'] = ssh_keys
+ 
+     # custom hostname -- try hostname or leave cloud-init
+     # itself create hostname from IP address later
+@@ -453,3 +477,4 @@
+ # Return a list of data sources that match this set of dependencies
+ def get_datasource_list(depends):
+     return sources.list_from_depends(depends, datasources)
++

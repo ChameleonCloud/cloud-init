@@ -1,0 +1,45 @@
+From 077181aa07cc3ca11d526b421b4d4e006bd5eba7 Mon Sep 17 00:00:00 2001
+From: Lars Kellogg-Stedman <lars@redhat.com>
+Date: Mon, 23 Jun 2014 13:13:24 -0400
+Subject: [PATCH] update paths for rhel
+
+---
+ cloudinit/config/cc_keys_to_console.py | 2 +-
+ setup.py                               | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/cloudinit/config/cc_keys_to_console.py b/cloudinit/config/cc_keys_to_console.py
+index ed7af69..e8bc33a 100644
+--- a/cloudinit/config/cc_keys_to_console.py
++++ b/cloudinit/config/cc_keys_to_console.py
+@@ -26,7 +26,7 @@ from cloudinit import util
+ frequency = PER_INSTANCE
+ 
+ # This is a tool that cloud init provides
+-HELPER_TOOL = '/usr/lib/cloud-init/write-ssh-key-fingerprints'
++HELPER_TOOL = '/usr/libexec/cloud-init/write-ssh-key-fingerprints'
+ 
+ 
+ def handle(name, cfg, _cloud, log, _args):
+diff --git a/setup.py b/setup.py
+index 9118e5f..9eb83aa 100755
+--- a/setup.py
++++ b/setup.py
+@@ -45,7 +45,7 @@ INITSYS_FILES = {
+ INITSYS_ROOTS = {
+     'sysvinit': '/etc/rc.d/init.d',
+     'sysvinit_deb': '/etc/init.d',
+-    'systemd': '/etc/systemd/system/',
++    'systemd': '/usr/lib/systemd/system/',
+     'upstart': '/etc/init/',
+ }
+ INITSYS_TYPES = sorted(list(INITSYS_ROOTS.keys()))
+@@ -123,7 +123,7 @@ setuptools.setup(name='cloud-init',
+                   ('/etc/cloud/cloud.cfg.d', glob('config/cloud.cfg.d/*')),
+                   ('/etc/cloud/templates', glob('templates/*')),
+                   ('/usr/share/cloud-init', []),
+-                  ('/usr/lib/cloud-init',
++                  ('/usr/libexec/cloud-init',
+                     ['tools/uncloud-init',
+                      'tools/write-ssh-key-fingerprints']),
+                   ('/usr/share/doc/cloud-init',
